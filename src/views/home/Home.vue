@@ -5,12 +5,15 @@
       <div slot="center">购物街</div>
     </nav-bar>
 
-    <scroll class="wrapper" :probeType="3" @scrollY="scrollY" ref="scroll">
+    <!-- 选项卡吸顶复制版 -->
+    <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" v-show="isTabControlFixed"></tab-control>
+
+    <scroll class="wrapper" :probeType="3" @scrollY="scrollY" @pullingUp="pullingUp" ref="scroll">
       <!-- 轮播图 -->
       <swiper v-if="banner.length">
         <swiper-item v-for="item in banner" :key="item.image">
           <a :href="item.link">
-            <img :src="item.image" alt="">
+            <img :src="item.image" alt="" @load="swiperImgLoad">
           </a>
         </swiper-item>
       </swiper>
@@ -19,7 +22,7 @@
       <!-- 本周流行 -->
       <home-popular></home-popular>
       <!-- 选项卡 -->
-      <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType"></tab-control>
+      <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" ref="tabControl" v-show="!isTabControlFixed"></tab-control>
       <!-- 选项卡内容展示区 -->
       <Waterfall :goods="goods[goodsType].list" class="goods"></Waterfall>
     </scroll>
@@ -39,6 +42,7 @@
   import BackTop from 'components/content/backTop/BackTop'
 
   import { getHomeMultidata, getHomeGoods } from 'network/home'
+  import { debounce } from '@/common/utils'
 
   export default {
     name: 'Home',
@@ -63,7 +67,9 @@
           'sell': { page: 0, list: [] }
         },
         goodsType: 'pop', // 默认显示的商品类型
-        backTopShow: false  // 返回顶部按钮是否显示
+        backTopShow: false,  // 返回顶部按钮是否显示
+        tabControlTop: 0, // 选项卡距离可滚动区域顶部高度
+        isTabControlFixed: false, // 是否吸顶
       }
     },
     methods: {
@@ -80,7 +86,7 @@
           }
         )
       },
-      
+
       /*      事件监听相关     */
       // 子组件点击选项卡获取当前显示的商品
       getGoodsType(index) {
@@ -93,15 +99,24 @@
             break
         }
       },
-      // 返回顶部按钮是否显示
+      // 监听滚动位置
       scrollY(position) {
         this.backTopShow = position.y < -1000
+        this.isTabControlFixed = -position.y >= this.tabControlTop
       },
       // 点击返回顶部
       backTop() {
         this.$refs.scroll.scrollTo(0, 0)
+      },
+      // 上拉加载
+      pullingUp() {
+        this.getHomeGoods(this.goodsType)
+        this.$refs.scroll.finishPullUp()
+      },
+      // 监听轮播图图片加载完成
+      swiperImgLoad() {
+        this.tabControlTop = this.$refs.tabControl.$el.offsetTop - 35
       }
-
     },
     created() {
       // 请求home页面数据
@@ -117,6 +132,15 @@
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
+    },
+    mounted() {
+      const refresh = debounce(this.$refs.scroll.refresh, 300)
+      // 监听图片加载完成
+      this.$bus.$on('imageLoad', () =>{
+        refresh()
+      })
+      
+      
     }
   }
 </script>
@@ -128,9 +152,6 @@
   .nav-bar{
     background-color: var(--color-tint);
     color: #fff;
-    position: sticky;
-    top: 0;
-    z-index: 999;
   }
   .recommend {
     background-color: #fff;

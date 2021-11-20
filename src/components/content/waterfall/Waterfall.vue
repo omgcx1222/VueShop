@@ -1,7 +1,7 @@
 <template>
   <div class="waterfall">
-    <div class="waterfall-item" v-for="item in goods" :key="item.iid">
-      <img :src="item.show.img" alt="">
+    <div class="waterfall-item" v-for="(item, index) in goods" :key="index">
+      <img :src="item.show.img" alt="" @load="imgLoad">
       <p class="title">{{item.title}}</p>
       <div class="price-cfav">
         <span class="price">￥{{item.price}}</span>
@@ -24,6 +24,12 @@
       column: {
         type: Number,
         default: 2
+      }
+    },
+    methods: {
+      // 监听图片加载完成
+      imgLoad() {
+        this.$bus.$emit('imageLoad')
       }
     }
   }
