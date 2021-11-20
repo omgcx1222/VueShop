@@ -52,7 +52,7 @@
     background-color: #fff;
   }
   .tab-control-item span {
-    padding: 5px;
+    padding: 3px;
   }
   .active {
     color: var(--color-high-text);

@@ -6,7 +6,7 @@
     </nav-bar>
 
     <!-- 选项卡吸顶复制版 -->
-    <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" v-show="isTabControlFixed"></tab-control>
+    <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" v-show="isTabControlFixed" ref="tabControl1"></tab-control>
 
     <scroll class="wrapper" :probeType="3" @scrollY="scrollY" @pullingUp="pullingUp" ref="scroll">
       <!-- 轮播图 -->
@@ -22,7 +22,7 @@
       <!-- 本周流行 -->
       <home-popular></home-popular>
       <!-- 选项卡 -->
-      <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" ref="tabControl" v-show="!isTabControlFixed"></tab-control>
+      <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" ref="tabControl2" v-show="!isTabControlFixed"></tab-control>
       <!-- 选项卡内容展示区 -->
       <Waterfall :goods="goods[goodsType].list" class="goods"></Waterfall>
     </scroll>
@@ -68,6 +68,7 @@
         },
         goodsType: 'pop', // 默认显示的商品类型
         backTopShow: false,  // 返回顶部按钮是否显示
+        isSwiperImgLoad: false, // 轮播图 图片加载完成
         tabControlTop: 0, // 选项卡距离可滚动区域顶部高度
         isTabControlFixed: false, // 是否吸顶
       }
@@ -98,6 +99,11 @@
           case 2: this.goodsType = 'sell'
             break
         }
+        // 同步当前显示的index
+        this.$refs.tabControl1.current = index
+        this.$refs.tabControl2.current = index
+        // 返回吸顶部位
+        this.$refs.scroll.scrollTo(0, -this.tabControlTop, 0)
       },
       // 监听滚动位置
       scrollY(position) {
@@ -113,9 +119,13 @@
         this.getHomeGoods(this.goodsType)
         this.$refs.scroll.finishPullUp()
       },
-      // 监听轮播图图片加载完成
+      // 监听轮播图图片加载完成 获取选项卡距顶高度
       swiperImgLoad() {
-        this.tabControlTop = this.$refs.tabControl.$el.offsetTop - 35
+        // 节流，只加载一次
+        if(!this.isSwiperImgLoad) {
+          this.tabControlTop = this.$refs.tabControl2.$el.offsetTop - 35
+          this.isSwiperImgLoad = true
+        }
       }
     },
     created() {
