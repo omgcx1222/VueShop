@@ -10,7 +10,7 @@
 
     <scroll class="wrapper" :probeType="3" @scrollY="scrollY" @pullingUp="pullingUp" ref="scroll">
       <!-- 轮播图 -->
-      <swiper v-if="banner.length">
+      <swiper v-if="banner.length" class="swiper">
         <swiper-item v-for="item in banner" :key="item.image">
           <a :href="item.link">
             <img :src="item.image" alt="" @load="swiperImgLoad">
@@ -22,7 +22,7 @@
       <!-- 本周流行 -->
       <home-popular></home-popular>
       <!-- 选项卡 -->
-      <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" ref="tabControl2" v-show="!isTabControlFixed"></tab-control>
+      <tab-control :title="['流行', '新款', '精选']" @clickTabControl="getGoodsType" v-show="!isTabControlFixed" ref="tabControl2"></tab-control>
       <!-- 选项卡内容展示区 -->
       <Waterfall :goods="goods[goodsType].list" class="goods"></Waterfall>
     </scroll>
@@ -41,7 +41,7 @@
   import Scroll from 'components/common/scroll/Scroll'
   import BackTop from 'components/content/backTop/BackTop'
 
-  import { getHomeMultidata, getHomeGoods } from 'network/home'
+  import { homeMultidataRequest, homeGoodsRequest } from 'network/home'
   import { debounce } from '@/common/utils'
 
   export default {
@@ -71,6 +71,7 @@
         isSwiperImgLoad: false, // 轮播图 图片加载完成
         tabControlTop: 0, // 选项卡距离可滚动区域顶部高度
         isTabControlFixed: false, // 是否吸顶
+        deacScrollY: 0,  // 记录离开前滚动的位置
       }
     },
     methods: {
@@ -79,7 +80,7 @@
         // const p = 1
         const p = this.goods[type].page + 1
         // 调用网络请求方法
-        getHomeGoods(type, p).then(
+        homeGoodsRequest(type, p).then(
           res =>{
             // console.log(res);
             this.goods[type].list.push(...res.data.list)
@@ -126,11 +127,15 @@
           this.tabControlTop = this.$refs.tabControl2.$el.offsetTop - 35
           this.isSwiperImgLoad = true
         }
+      },
+      imgOk() {
+        this.$refs.scroll.refresh()
+        console.log('home');
       }
     },
     created() {
       // 请求home页面数据
-      getHomeMultidata().then(
+      homeMultidataRequest().then(
         res =>{
           // console.log(res.data);
           this.banner = res.data.banner.list
@@ -143,14 +148,20 @@
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
     },
-    mounted() {
-      const refresh = debounce(this.$refs.scroll.refresh, 300)
-      // 监听图片加载完成
+    deactivated() {
+      // 离开时清除所有监听（没写回调也包括detail）
+      this.$bus.$off('imageLoad')
+      // 离开时记录滚动的位置
+      this.deacScrollY = this.$refs.scroll.scroll.y
+    },
+    activated() {
+      // 激活时开启监听
       this.$bus.$on('imageLoad', () =>{
-        refresh()
+        this.$refs.scroll.refresh()
       })
-      
-      
+      // 激活时跳转到离开前的位置
+      this.$refs.scroll.refresh()
+      this.$refs.scroll.scrollTo(0, this.deacScrollY, 0)
     }
   }
 </script>
@@ -162,6 +173,9 @@
   .nav-bar{
     background-color: var(--color-tint);
     color: #fff;
+  }
+  .swiper img{
+    height: 100%;
   }
   .recommend {
     background-color: #fff;

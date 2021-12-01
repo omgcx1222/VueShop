@@ -1,10 +1,10 @@
 <template>
   <div class="waterfall">
-    <div class="waterfall-item" v-for="(item, index) in goods" :key="index">
-      <img :src="item.show.img" alt="" @load="imgLoad">
+    <div class="waterfall-item" v-for="(item, index) in goods" :key="index" @click="itemClick(item)">
+      <img :src="item.image || item.show.img" alt="" @load="imgLoad">
       <p class="title">{{item.title}}</p>
       <div class="price-cfav">
-        <span class="price">￥{{item.price}}</span>
+        <span class="price">￥{{item.discountPrice || item.price}}</span>
         <span class="iconfont icon-shoucang cfav">{{item.cfav}}</span>
       </div>
     </div>
@@ -20,16 +20,39 @@
         default() {
           return []
         }
-      },
-      column: {
-        type: Number,
-        default: 2
+      }
+    },
+    data() {
+      return {
+        timer: null,  // 节流
       }
     },
     methods: {
+      showImg(goods) {
+        // if(goods.show) return goods.show.img
+        // if(goods.image) return goods.image
+
+        // 先后顺序问题：当一个对象的属性为undefined时，去读取这个属性的属性不会报undefined而是会报错
+        // goods.image 在前面时不存在报undefined，而 goods.show.img 在前面时不存在则会报错
+        return goods.image || goods.show.img
+      },
       // 监听图片加载完成
       imgLoad() {
-        this.$bus.$emit('imageLoad')
+        // 防抖
+        if(this.timer) clearTimeout(this.timer)
+        this.timer = setTimeout(() => {
+          this.$bus.$emit('imageLoad')
+        }, 200);
+      },
+
+      itemClick(goods) {
+        let id = goods.item_id || goods.iid
+        if(this.$route.path == '/home') {
+          this.$router.push('/detail/' + id)
+        }else {
+          // this.$bus.$emit('detailId', id)
+          alert('没有接口')
+        }
       }
     }
   }

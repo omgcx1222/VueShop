@@ -1,16 +1,15 @@
 <template>
     <div id="hqq-swiper">
-      <div class="swiper" :style="swiperStyle" @touchstart="touchstart" @touchmove="touchmove" @touchend="touchend">
+      <div class="swiper" ref="swiper" :style="swiperStyle" @touchstart="touchstart" @touchmove="touchmove" @touchend="touchend">
         <slot></slot>
       </div>
-      <ul class="indicator" v-if="indicatorShow">
+      <ul class="indicator" v-if="indicatorShow && swiperIndex > 1">
         <li v-for="(item, index) in swiperIndex" :key="item" :style="indicatorStyle(index)"></li>
       </ul>
     </div>
 </template>
 
 <script>
-  import Vue from 'vue'
 	export default {
 		name: "Swiper",
     props: {
@@ -60,7 +59,8 @@
     methods: {
       // 初始化
       initialization() {
-        let swiper = document.querySelector('.swiper')
+        // let swiper = document.querySelector('.swiper')
+        let swiper = this.$refs.swiper
         let swiperItem = swiper.getElementsByClassName('swiperItem')
         // console.log(swiperItem[0], swiperItem.length);
         
@@ -133,18 +133,20 @@
 
       // 点击
       touchstart(event) {
+        if(this.swiperIndex <= 1) return
         this.moveWidth = 0
         this.startX = event.changedTouches[0].clientX
         clearInterval(this.timer)
-        
       },
       // 滑动
       touchmove(event) {
+        if(this.swiperIndex <= 1) return
         this.moveWidth = this.startX - event.changedTouches[0].clientX
         this.setTransform(this.swiperTranslateX - this.moveWidth, 0)
       },
       // 抬起
       touchend() {
+        if(this.swiperIndex <= 1) return
         // 判断滑动的幅度，滑动幅度不够则恢复原位
         if(Math.abs(this.moveWidth) > this.swiperWidth * this.moveRatio) {
           if(this.moveWidth > 0) {    // 左滑

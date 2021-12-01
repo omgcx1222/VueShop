@@ -1,13 +1,13 @@
 // home 组件相关网络请求
-import {request} from "./request";
+import { request } from "./request";
 
 // 请求home页面数据
-export function getHomeMultidata() {
+export function homeMultidataRequest() {
   return request('/home/multidata')
 }
 
 // 请求home页面商品数据
-export function getHomeGoods(type, page) {
+export function homeGoodsRequest(type, page) {
   return request({
     url: '/home/data',
     params: {
@@ -16,3 +16,4 @@ export function getHomeGoods(type, page) {
     }
   })
 }
+

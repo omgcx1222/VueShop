@@ -16,16 +16,15 @@
   .navbar{
     width: 100%;
     height: 35px;
+    line-height: 35px;
     display: flex;
     text-align: center;
     box-shadow: -1px 0px 3px rgba(100, 100, 100, 0.2);
   }
   .navbar .left, .navbar .right{
     width: 12%;
-    line-height: 35px;
   }
   .navbar .center{
     flex: 1;
-    line-height: 35px;
   }
 </style>

@@ -1,6 +1,8 @@
 <template>
   <div>
-    <router-view></router-view>
+    <keep-alive exclude="GoodsDetail">
+      <router-view></router-view>
+    </keep-alive> 
     <tab-bar class="tab-bar">
       <tab-bar-item path="/home" avtiveColor="#d4237a">
         <img slot="icon-img" src="~assets/img/tabbar/home.svg" alt="">
