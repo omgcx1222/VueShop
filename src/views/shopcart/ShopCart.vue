@@ -1,30 +1,38 @@
 <template>
-  <div>
+  <div class="shop-cart">
     <nav-bar class="nav-bar">
-      <div slot="center">购物车</div>
+      <div slot="center">购物车（{{cartLength}}）</div>
     </nav-bar>
-    <scroll class="scroll" ref="scroll">
-      <shop-cart-list  v-for="(item, index) in $store.state.cartList" :key="item.xdSkuId" :goods="item" :index="index">
-        
+
+    <div class="scroll" v-if="$store.state.cartList.length">
+      <shop-cart-list v-for="(item, index) in $store.state.cartList" :key="item.xdSkuId" :goods="item" :index="index">
       </shop-cart-list>
-    </scroll>
+    </div>
+
+    <div v-else>
+      <div>购物车为空</div>
+    </div>
+
+    <shop-cart-bottom-bar v-show="$store.state.cartList.length"></shop-cart-bottom-bar>
   </div>
 </template>
 
 <script>
   import NavBar from 'components/common/navbar/NavBar.vue'
-  import Scroll from 'components/common/scroll/Scroll.vue'
   import ShopCartList from './children/ShopCartList.vue'
+  import ShopCartBottomBar from './children/ShopCartBottomBar.vue'
+
+  import { mapGetters } from 'vuex'
   
   export default {
     name: 'Home',
     components: {
       NavBar,
-      Scroll,
       ShopCartList,
+      ShopCartBottomBar
     },
-    activated() {
-      this.$refs.scroll.refresh()
+    computed: {
+      ...mapGetters(['cartLength'])
     },
     methods: {
 
@@ -38,9 +46,10 @@
     color: #fff;
   }
   .scroll {
-    height: calc(100vh - 84px);
+    height: calc(100vh - 84px - 50px);
     font-size: 13px;
-    overflow: hidden;
+    overflow: scroll;
+    background-color: #f7f7f7;
   }
   
 </style>

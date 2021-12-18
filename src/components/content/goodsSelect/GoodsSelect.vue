@@ -13,34 +13,33 @@
             <div class="price">{{currentInfo.currency || '￥'}}<span>{{currentInfo.nowprice / 100 || 0}}</span></div>
             <div>
               <span style="color: #8c8c8c;">已选 </span>
-              <span v-for="(item, index) in propsList" :key="index" v-show="item.name">{{item.name}}，</span>
-              <span>{{count}}个</span>
+              <span v-for="item in propsList" :key="item.label" v-show="item.name">{{item.name}}，</span>
+              <span v-if="$route.path === '/shopcart'">{{$store.state.cartList[index].count}}个</span>
+              <span v-else>{{count}}个</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- <scroll class="scroll"> -->
-        <div class="scroll">
-          <div class="props-item" v-for="(item, styleIndex) in skuInfo.props" :key="item.label">
-            <div class="props-label">{{item.label}}</div>
-            <div>
-              <span class="props-list"
-                v-for="(list, index) in item.list" 
-                :key="list.styleId"
-                :class="{'active': propsList[styleIndex].currentIndex === index}"
-                @click="listClick(list, styleIndex, index)"
-                >
-                {{list.name}}
-              </span>
-            </div>
-          </div>
-          <div class="count">
-            <div>数量</div>
-            <count @handleCount="handleCount"></count>
+      <div class="scroll">
+        <div class="props-item" v-for="(item, styleIndex) in skuInfo.props" :key="item.label">
+          <div class="props-label">{{item.label}}</div>
+          <div>
+            <span class="props-list"
+              v-for="(list, index) in item.list" 
+              :key="list.styleId"
+              :class="{'active': propsList[styleIndex].currentIndex === index}"
+              @click="listClick(list, styleIndex, index)"
+              >
+              {{list.name}}
+            </span>
           </div>
         </div>
-      <!-- </scroll> -->
+        <div class="count" v-if="$route.path != '/shopcart'">
+          <div>数量</div>
+          <count @handleCount="handleCount"></count>
+        </div>
+      </div>
       
       <div class="btn-ok">
         <div @click="isOk">确认</div>
@@ -63,13 +62,35 @@
         default() {
           return {}
         }
+      },
+      iid: {
+        type: String,
+        default() {
+          return ''
+        }
+      },
+      index: {
+        type: Number,  // 购物车列表中的第几个商品
       }
     },
     data() {
       return {
         propsList: [], // 当前选中的规格
-        currentInfo: {}, // 当前选中的商品的信息
+        currentInfo: {}, // 当前选中规格的商品信息
         count: 1, // 数量
+      }
+    },
+    activated() {
+      if(this.$route.path === '/shopcart') {
+        const good = this.$store.state.cartList[this.index]
+        this.count = good.count
+        // for(let i in good.style) {
+        //   const s = {
+        //     name: good.style[i].name,
+        //     currentIndex: good.style[i].currentIndex
+        //   }
+        //   this.propsList.push(s)
+        // }
       }
     },
     methods: {
@@ -92,53 +113,58 @@
           this.propsList[styleIndex].name = ''
           this.currentInfo = {}
         }
-        
-        for(let s in this.skuInfo.skus) {
-          let arr = []
-          let arr2 = []
-          for(let i in this.propsList) {
-            arr.push(this.skuInfo.skus[s][this.propsList[i].type])
-            arr2.push(this.propsList[i].name)
+        // 规格全部选中
+        if(this.propsList.length === this.skuInfo.props.length) {
+          for(let s in this.skuInfo.skus) {
+            let arr = []
+            let arr2 = []
+            for(let i in this.propsList) {
+              arr.push(this.skuInfo.skus[s][this.propsList[i].type])
+              arr2.push(this.propsList[i].name)
+            }
+            // console.log(arr,arr2);
+            // 选中的和已有的判断
+            if(arr.toString() === arr2.toString()) this.currentInfo = this.skuInfo.skus[s]
           }
-          // console.log(arr,arr2);
-          if(arr.toString() === arr2.toString()) this.currentInfo = this.skuInfo.skus[s]
         }
+        
       },
       // 点击确认
       isOk() {
         if(this.currentInfo.xdSkuId) {
           const goodsInfo = {
+            iid: this.iid,
             img: this.currentInfo.img,
             title: this.skuInfo.title,
             nowprice: this.currentInfo.nowprice,
             xdSkuId: this.currentInfo.xdSkuId,
             count: this.count * 1,  // 数量
-            style: this.propsList  // 选中的规格
+            style: JSON.parse(JSON.stringify(this.propsList)),  // 选中的规格(深拷贝)
+            isCheck: true,  // 购物车列表中是否选中状态
+          }
+          if(this.$route.path === '/shopcart') {
+            // 选中的同一规格
+            if(JSON.stringify(this.propsList) === JSON.stringify(this.$store.state.cartList[this.index].style)) {
+              return this.$emit('back', 'ok')
+            }
+            goodsInfo.count =  this.$store.state.cartList[this.index].count * 1,  // 数量
+            goodsInfo.index = this.index
+            // this.$store.dispatch('changeInfo', goodsInfo)
           }
           this.$store.dispatch('cartOk', goodsInfo)
           this.$emit('back', 'ok')
         }
-        
       }
-      
     },
     watch: {
-      // for(let i in this.skuInfo.props) {
-      //   const obj = {
-      //     type: this.skuInfo.props[i].list[0].type,
-      //     lable: this.skuInfo.props[i].label,
-      //     currentIndex: '',  // 选中的每个规格的第几个
-      //     name: ''  // 规格名字
-      //   }
-      //   this.propsList.push(obj)
-      // }
       skuInfo(newval) {
+        this.propsList = []
         for(let i in newval.props) {
           const obj = {
             type: newval.props[i].list[0].type,
             lable: newval.props[i].label,
-            currentIndex: '',
-            name: ''
+            currentIndex: '',  // 选中的每个规格的第几个
+            name: ''  // 规格名字
           }
           this.propsList.push(obj)
         }
@@ -154,6 +180,8 @@
     position: fixed;
     z-index: 1000;
     top: 100vh;
+    left: 0;
+    transition: top .2s cubic-bezier(0, 0, 0.25, 1);
     color: black;
     font-size: 13px;
     overflow: hidden;

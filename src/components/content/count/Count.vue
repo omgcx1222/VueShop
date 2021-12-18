@@ -1,7 +1,8 @@
 <template>
   <div class="compute">
     <div class="jian" @click="reduce">-</div>
-    <input class="num" type="text" id="" v-model="count" @blur="handle">
+    <input class="num" type="number" id="" v-model="count" @blur="handle" v-if="$route.path != '/shopcart'">
+    <input class="num" type="number" id="" :value="changeCount" v-else ref="inp" @blur="handle">
     <div class="jia" @click="add">+</div>
   </div>
 </template>
@@ -17,37 +18,64 @@
     props: {
       index: {  // 购物车中的第几个商品
         type: Number
-      },
-      cartCount: {  // 购物车每个商品对应的显示数量
-        type: Number
       }
     },
     methods: {
       reduce() {
+        if(this.$route.path === '/shopcart') {
+          this.count = this.$store.state.cartList[this.index].count
+        }
         if(this.count > 1) this.count --
       },
       add() {
+        if(this.$route.path === '/shopcart') {
+          this.count = this.$store.state.cartList[this.index].count
+        }
         this.count ++
       },
       handle() {
-        if(this.count < 1) this.count = 1
+        if(this.$route.path === '/shopcart') {
+          let num = this.$refs.inp.value.replace(/\b(0+)/gi,"") // 去掉前面的0
+          if(num < 1) {
+            this.$refs.inp.value = this.count
+          }else {
+            this.count = this.$refs.inp.value
+          }
+        }else {
+          if(this.count < 1) this.count = 1
+        }
+      },
+    },
+    computed: {
+      changeCount() {
+        return this.$store.state.cartList[this.index].count
       }
     },
     watch: {
       count(newval) {
-        this.$emit('handleCount', newval)
         if(this.$route.path === '/shopcart') {
           const obj = {
             count: newval,
             index: this.index
           }
           this.$store.dispatch('changeCount', obj)
+        }else {
+          this.$emit('handleCount', newval)
         }
       }
     },
-    activated() {
-      if(this.$route.path === '/shopcart') this.count = this.cartCount
-    }
+    // activated() {
+    //   console.log("activated");
+    //   if(this.$route.path === '/shopcart') this.count = this.$store.state.cartList[this.index].count
+    // },
+    // created() {
+    //   console.log("created");
+    //   if(this.$route.path === '/shopcart') this.count = this.$store.state.cartList[this.index].count
+    // },
+    // updated() {
+    //   console.log("updated");
+    //   if(this.$route.path === '/shopcart') this.count = this.$store.state.cartList[this.index].count
+    // }
   }
 </script>
 

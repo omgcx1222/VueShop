@@ -23,7 +23,7 @@
     </scroll>
 
     <detail-bottom-bar @addCart="addCart"></detail-bottom-bar>
-    <cart-select :skuInfo="skuInfo" :style="positionTop" @back="back"></cart-select>
+    <goods-select :style="positionTop" :skuInfo="skuInfo" :iid="iid" @back="back"></goods-select>
     <tips :message="message" :isShow="isShow"></tips>
   </div>
 </template>
@@ -34,7 +34,7 @@
   import Scroll from 'components/common/scroll/Scroll'
   import { Swiper, SwiperItem } from 'components/common/swiper/index'
   import Tips from 'components/common/tips/Tips.vue'
-  import CartSelect from 'components/content/cartSelect/CartSelect.vue'
+  import GoodsSelect from '../../components/content/goodsSelect/GoodsSelect.vue'
 
   import DetailNavBar from './children/DetailNavBar'
   import DetailGoodsInfo from './children/DetailGoodsInfo'
@@ -60,7 +60,7 @@
       DetailGoodsRecom,
       DetailBottomBar,
       Tips,
-      CartSelect,
+      GoodsSelect,
     },
     data() {
       return {
@@ -146,7 +146,7 @@
       },
       // 弹出弹框
       addCart() {
-        this.positionTop = 'top: 0; transition: top .2s cubic-bezier(0, 0, 0.25, 1);'
+        this.positionTop = 'top: 0;'
       },
       // 收回弹框
       back(ok) {
@@ -156,7 +156,7 @@
           this.message = '加入购物车成功'
           setTimeout(()=> {
             this.isShow = false
-          }, 2000)
+          }, 1000)
         }
         
       },

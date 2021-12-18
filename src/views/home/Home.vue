@@ -42,7 +42,6 @@
   import BackTop from 'components/content/backTop/BackTop'
 
   import { homeMultidataRequest, homeGoodsRequest } from 'network/home'
-  import { debounce } from '@/common/utils'
 
   export default {
     name: 'Home',
