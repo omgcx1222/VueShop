@@ -15,7 +15,9 @@
     props: {
       recommend: {
         type: Array,
-        default: []
+        default(){
+          return []
+        }
       }
     }
   }

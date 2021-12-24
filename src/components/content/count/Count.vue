@@ -25,7 +25,11 @@
         if(this.$route.path === '/shopcart') {
           this.count = this.$store.state.cartList[this.index].count
         }
-        if(this.count > 1) this.count --
+        if(this.count > 1) {
+          this.count --
+        }else {
+          this.$toast.show('该商品1件起售')
+        }
       },
       add() {
         if(this.$route.path === '/shopcart') {
@@ -36,10 +40,11 @@
       handle() {
         if(this.$route.path === '/shopcart') {
           let num = this.$refs.inp.value.replace(/\b(0+)/gi,"") // 去掉前面的0
-          if(num < 1) {
-            this.$refs.inp.value = this.count
-          }else {
+          if(num >= 1) {
             this.count = this.$refs.inp.value
+          }else {
+            this.$refs.inp.value = this.count  // 值还原
+            this.$toast.show('该商品1件起售')
           }
         }else {
           if(this.count < 1) this.count = 1

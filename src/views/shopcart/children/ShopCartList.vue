@@ -13,7 +13,7 @@
           <!-- 逗号 -->
           {{s === goods.style.length - 1 ? '' : '，'}}
         </span>
-        <span class="iconfont icon-xiala xiala"></span>
+        <span class="iconfont icon-xiala"></span>
       </div>
       <div class="price-count">
         <div class="price">{{price}}</div>

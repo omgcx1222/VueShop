@@ -1,7 +1,7 @@
 <template>
   <div class="waterfall">
     <div class="waterfall-item" v-for="(item, index) in goods" :key="index" @click="itemClick(item)">
-      <img :src="item.image || item.show.img" alt="" @load="imgLoad">
+      <img v-lazy="item.image || item.show.img" alt="" @load="imgLoad">
       <p class="title">{{item.title}}</p>
       <div class="price-cfav">
         <span class="price">￥{{item.discountPrice || item.price}}</span>

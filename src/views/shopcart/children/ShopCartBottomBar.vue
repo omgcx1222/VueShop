@@ -47,12 +47,13 @@
         }, 0).toFixed(2)
       },
       isCheck() {
-        let bool = this.$store.state.cartList.find(item => item.isCheck == false)
-        if(bool) { // 存在未选中的商品
-          return false
-        }else { // 商品全选
-          return true
-        }
+        // let bool = this.$store.state.cartList.find(item => item.isCheck == false)
+        // if(bool) { // 存在未选中的商品
+        //   return false
+        // }else { // 商品全选
+        //   return true
+        // }
+        return !this.$store.state.cartList.find(item => !item.isCheck)
       }
     }
   }

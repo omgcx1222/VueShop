@@ -24,7 +24,6 @@
 
     <detail-bottom-bar @addCart="addCart"></detail-bottom-bar>
     <goods-select :style="positionTop" :skuInfo="skuInfo" :iid="iid" @back="back"></goods-select>
-    <tips :message="message" :isShow="isShow"></tips>
   </div>
 </template>
 
@@ -33,7 +32,6 @@
 
   import Scroll from 'components/common/scroll/Scroll'
   import { Swiper, SwiperItem } from 'components/common/swiper/index'
-  import Tips from 'components/common/tips/Tips.vue'
   import GoodsSelect from '../../components/content/goodsSelect/GoodsSelect.vue'
 
   import DetailNavBar from './children/DetailNavBar'
@@ -59,7 +57,6 @@
       DetailRate,
       DetailGoodsRecom,
       DetailBottomBar,
-      Tips,
       GoodsSelect,
     },
     data() {
@@ -79,8 +76,6 @@
         current: 0,  // 当前导航显示的index
         skuInfo: {}, // 商品所有规格信息
         positionTop: '', // 弹框位置
-        isShow: false,
-        message: '',
       }
     },
     created() {
@@ -149,15 +144,15 @@
         this.positionTop = 'top: 0;'
       },
       // 收回弹框
-      back(ok) {
+      back() {
         this.positionTop = 'top: 100vh; transition: top .05s'
-        if(ok) {  // 有ok代表点击确认收回弹框，没有则表示点击关闭收回弹框
-          this.isShow = true
-          this.message = '加入购物车成功'
-          setTimeout(()=> {
-            this.isShow = false
-          }, 1000)
-        }
+        // if(ok) {  // 有ok代表点击确认收回弹框，没有则表示点击关闭收回弹框
+        //   this.isShow = true
+        //   this.message = '加入购物车成功'
+        //   setTimeout(()=> {
+        //     this.isShow = false
+        //   }, 1000)
+        // }
         
       },
       // 监听推荐图片加载完成

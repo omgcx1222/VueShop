@@ -151,8 +151,12 @@
             goodsInfo.index = this.index
             // this.$store.dispatch('changeInfo', goodsInfo)
           }
-          this.$store.dispatch('cartOk', goodsInfo)
-          this.$emit('back', 'ok')
+          this.$store.dispatch('cartOk', goodsInfo).then(
+            res =>{
+              this.$emit('back')
+              this.$toast.show(res)
+            }
+          )
         }
       }
     },
